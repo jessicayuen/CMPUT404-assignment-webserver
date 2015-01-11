@@ -1,7 +1,9 @@
-import SocketServer
 # coding: utf-8
 
-# Copyright 2013 Abram Hindle, Eddie Antonio Santos
+import SocketServer
+import os
+
+# Copyright 2013 Abram Hindle, Eddie Antonio Santos, Jessica Yuen
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,10 +31,47 @@ import SocketServer
 
 class MyWebServer(SocketServer.BaseRequestHandler):
     
+    CONTENT_DIR = "www"
+
     def handle(self):
+        """Handles common (but not all) HTTP requests."""
+        # Parse the HTTP request
         self.data = self.request.recv(1024).strip()
-        print ("Got a request of: %s\n" % self.data)
-        self.request.sendall("OK")
+        http_request = self.data.splitlines()
+        request_line = http_request[0].split()
+        path = os.path.abspath(self.CONTENT_DIR + request_line[1]);
+
+        response = None
+
+        # Are we in the www directory?
+        if os.path.abspath(self.CONTENT_DIR) not in os.path.realpath(path):
+            response = self.response_not_found()
+
+        # Is the path a directory and does index exists?
+        elif os.path.isdir(path) and os.path.isfile(path + "/index.html"):
+            response = self.response_ok(path + "/index.html", "text/html")
+
+        # Is the path a valid file?
+        elif os.path.isfile(path):
+            content_type = path.split(".")[-1].lower()
+            response = self.response_ok(path, "text/%s" % content_type)
+
+        # Path does not exist
+        else:
+            response = self.response_not_found()
+
+        # Finally, send in the response!
+        self.request.sendall(response)
+
+    def response_ok(self, path, content_type):
+        """Returns a simplified HTTP/1.1 200 OK response."""
+        return ("HTTP/1.1 200 OK\r\n" +
+                "Content-Type: %s\r\n" % content_type +
+                open(path).read());
+
+    def response_not_found(self):
+        """Returns a simplified HTTP/1.1 404 Not Found response."""
+        return "HTTP/1.1 404 Not Found"
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
