@@ -66,7 +66,7 @@ class MyWebServer(SocketServer.BaseRequestHandler):
     def response_ok(self, path, content_type):
         """Returns a simplified HTTP/1.1 200 OK response."""
         return ("HTTP/1.1 200 OK\r\n" +
-                "Content-Type: %s\r\n" % content_type +
+                "Content-Type: %s\n\n" % content_type +
                 open(path).read());
 
     def response_not_found(self):
