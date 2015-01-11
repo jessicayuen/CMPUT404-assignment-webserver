@@ -71,7 +71,11 @@ class MyWebServer(SocketServer.BaseRequestHandler):
 
     def response_not_found(self):
         """Returns a simplified HTTP/1.1 404 Not Found response."""
-        return "HTTP/1.1 404 Not Found"
+        return ("HTTP/1.1 404 Not Found\r\n" +
+                "Content-Type: text/html\n\n" +
+                "<!DOCTYPE html>\n" +
+                "<html><body><h1>Oops! The page you are looking for seems to " +
+                "be missing.</h1></body></html>")
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
