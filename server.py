@@ -46,7 +46,7 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         # Are we in the www directory?
         if os.path.abspath(self.CONTENT_DIR) not in os.path.realpath(path):
             response = self.response_not_found()
-
+        
         # Is the path a directory and does index exists?
         elif os.path.isdir(path) and os.path.isfile(path + "/index.html"):
             response = self.response_ok(path + "/index.html", "text/html")
@@ -65,16 +65,18 @@ class MyWebServer(SocketServer.BaseRequestHandler):
 
     def response_ok(self, path, content_type):
         """Returns a simplified HTTP/1.1 200 OK response."""
-        return ("HTTP/1.1 200 OK\r\n" +
+        return ("HTTP/1.1 200 OK\r\n"
+                "Connection: close\r\n"
                 "Content-Type: %s\n\n" % content_type +
                 open(path).read());
 
     def response_not_found(self):
         """Returns a simplified HTTP/1.1 404 Not Found response."""
-        return ("HTTP/1.1 404 Not Found\r\n" +
-                "Content-Type: text/html\n\n" +
-                "<!DOCTYPE html>\n" +
-                "<html><body><h1>Oops! The page you are looking for seems to " +
+        return ("HTTP/1.1 404 Not Found\r\n"
+                "Connection: close\r\n"
+                "Content-Type: text/html\n\n"
+                "<!DOCTYPE html>\n"
+                "<html><body><h1>Oops! The page you are looking for seems to "
                 "be missing.</h1></body></html>")
 
 if __name__ == "__main__":
